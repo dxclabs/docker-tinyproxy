@@ -19,18 +19,16 @@ docker build -t tinyproxy .
 docker run -d --name tinyproxy -p 8888:8888 tinyproxy
 
 # proxy request via the running container
-http_proxy=127.0.0.1:8888 https_proxy=127.0.0.1:8888 curl https://www.google.com -v
+http_proxy=127.0.0.1:8888 https_proxy=127.0.0.1:8888 curl https://www.google.com --verbose
 
 # or
-curl -x 127.0.0.1:8888 curl https://www.google.com -v
+curl -x 127.0.0.1:8888 curl https://www.google.com --verbose
 
 # or proxy all requests from linux based containers
 docker run -t -i \
-  -e "http_proxy=tinyproxy:8888" \
-  -e "https_proxy=tinyproxy:8888" \
   --link tinyproxy \
-  travix/toolbox \
-  curl https://www.google.com
+  redhat/ubi9-minimal \
+  curl -x http://tinyproxy:8888 -L https://www.google.com --verbose
 ```
 
 ## Custom Tinyproxy configuration

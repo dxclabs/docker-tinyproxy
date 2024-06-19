@@ -1,8 +1,11 @@
-FROM travix/base-alpine:3.5
+# tinyproxy
+# Version: 1.0.0
 
-MAINTAINER Travix
+FROM alpine:3.20
 
-ENV TINYPROXY_VERSION=1.8
+LABEL maintainer="Campbell McKilligan <campbell@dxclabs.com>"
+
+ENV TINYPROXY_VERSION=1.11.2
 
 RUN adduser -D -u 2000 -h /var/run/tinyproxy -s /sbin/nologin tinyproxy tinyproxy \
   && apk --update add -t build-dependencies \
@@ -26,12 +29,14 @@ RUN adduser -D -u 2000 -h /var/run/tinyproxy -s /sbin/nologin tinyproxy tinyprox
   && apk del build-dependencies \
   && apk add --no-cache curl
 
-COPY tinyproxy.conf /etc/tinyproxy.conf
+COPY tinyproxy.conf /etc/tinyproxy/tinyproxy.conf
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
 USER tinyproxy
 
 EXPOSE 8888
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 CMD curl --fail -s -o /dev/null -H "Host: tinyproxy.stats" http://127.0.0.1:8888 || exit 1
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
